@@ -18,7 +18,7 @@ class Board extends events.EventEmitter
   ready: no
 
   constructor: (driver, driverOptions) ->
-    assert driver in ["serialport", "gpio"]
+    assert driver in ["serialport", "gpio", "tcp"]
     # setup a new driver
     switch driver
       when "serialport"
@@ -27,6 +27,9 @@ class Board extends events.EventEmitter
       when "gpio"
         GpioDriver =  require './driver/gpio'
         @driver = new GpioDriver(driverOptions)
+      when "tcp"
+        TcpDriver = require './driver/tcp'
+        @driver = new TcpDriver(driverOptions)
     
     @_lastAction = Promise.resolve()
     @driver.on('ready', (boardinfo) => 
