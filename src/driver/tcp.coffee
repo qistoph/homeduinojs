@@ -46,9 +46,12 @@ class TcpDriver extends events.EventEmitter
           Promise.delay(1000).then( =>
             @client.write("PING\n")
           ).done()
-          @once("ready", resolver)
+          @once("ready", =>
+            resolver()
+            resolve()
+          )
         ).timeout(timeout).catch( (err) =>
-          @removeListener("ready", resolver)
+          @removeListener("ready", resolve)
           if err.name is "TimeoutError" and retries > 0
             @emit 'reconnect', err
             # try to reconnect
@@ -57,10 +60,12 @@ class TcpDriver extends events.EventEmitter
             throw err
         )
       )
-    ).then('TcpDriver then test')
+    )
 
   disconnect: -> @client.end()
 
-  write: (data) -> @client.write(data)
+  write: (data) -> return new Promise( (resolve, reject) =>
+    @client.write(data, resolve)
+  )
 
 module.exports = TcpDriver
